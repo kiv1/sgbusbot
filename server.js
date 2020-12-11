@@ -26,7 +26,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN, {
 const HelpString = 'Please send the bus stop code (xxxxx), E.G. 72071 or both bus stop code and bus number (xxxxx bbb), E.G. 72071 21'
 
 
-var localStorage = new Storage("//tmp//db.json", {
+var localStorage = new Storage("tmp//db.json", {
   strict: false,
   ws: "  ",
 });
