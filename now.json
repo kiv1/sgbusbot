@@ -1,0 +1,6 @@
+{
+  "env": {
+    "BOT_TOKEN": "@bot_token",
+    "ACCOUNT_KEY": "@account_key"
+  }
+}
