@@ -527,6 +527,7 @@ bot.startPolling();
 expressApp.get('/', (req, res) => {
   try{
     bot.startPolling();
+    console.log('All working!')
     res.send('All working!');
   }catch(err){
     console.log(err)
