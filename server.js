@@ -1,10 +1,16 @@
 require('dotenv').config();
 
+const express = require('express');
+const expressApp = express();
 const Telegraf = require("telegraf");
 const Extra = require("telegraf/extra");
 const Markup = require("telegraf/markup");
 const request = require("request");
 const Storage = require("dom-storage");
+
+const API_TOKEN = process.env.BOT_TOKEN;
+const PORT = process.env.PORT;
+const URL = process.env.URL;
 
 const opts = {
     reply_markup: {
@@ -20,9 +26,13 @@ const opts = {
 
 const ltaDataMallKey = process.env.LTA_DATAMALL_KEY
 const allBusStopURL = process.env.ALL_BUS_STOP_URL
-const bot = new Telegraf(process.env.BOT_TOKEN, {
+const bot = new Telegraf(API_TOKEN, {
     polling: true
 })
+
+bot.telegram.setWebhook(`${URL}/bot${API_TOKEN}`);
+expressApp.use(bot.webhookCallback(`/bot${API_TOKEN}`));
+
 const HelpString = 'Please send the bus stop code (xxxxx), E.G. 72071 or both bus stop code and bus number (xxxxx bbb), E.G. 72071 21'
 
 
@@ -513,3 +523,10 @@ process.on("unhandledRejection", () => {});
 process.on("rejectionHandled", () => {});
 
 bot.startPolling();
+
+expressApp.get('/', (req, res) => {
+  res.send('Hello World!');
+});
+expressApp.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
