@@ -525,7 +525,13 @@ process.on("rejectionHandled", () => {});
 bot.startPolling();
 
 expressApp.get('/', (req, res) => {
-  res.send('Hello World!');
+  try{
+    bot.startPolling();
+    res.send('All working!');
+  }catch(err){
+    console.log(err)
+    res.send(err);
+  }
 });
 expressApp.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
