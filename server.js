@@ -277,7 +277,6 @@ async function handleLocation(varCtx) {
                 lng: value.lng
             }
             if (arePointsNear(checkedPoint, centerPoint, 0.25)) { 
-                console.log(key)              
                 counter++
                 output += '<a href="https://www.google.com/maps/search/?api=1&query=' + value.lat + ',' + value.lng + '">' + value.name + '  (' + key + ')</a>' + '\n'
                 let busServices = await getBus(key)
