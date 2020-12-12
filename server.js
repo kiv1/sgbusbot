@@ -47,6 +47,9 @@ let db = admin.database();
 bot.command("help", (ctx) => ctx.reply(HelpString));
 bot.command("Help", (ctx) => ctx.reply(HelpString));
 bot.command("/help", (ctx) => ctx.reply(HelpString));
+bot.command("/start", (ctx) => ctx.reply("Welcome! "+HelpString));
+bot.command("Start", (ctx) => ctx.reply("Welcome! "+HelpString));
+bot.command("start", (ctx) => ctx.reply("Welcome! "+HelpString));
 
 bot.on("text", async (ctx) => {
   try {
