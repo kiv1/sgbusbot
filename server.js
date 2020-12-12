@@ -6,11 +6,11 @@ const Telegraf = require("telegraf");
 const Extra = require("telegraf/extra");
 const Markup = require("telegraf/markup");
 const request = require("request");
-const Storage = require("dom-storage");
 
 const API_TOKEN = process.env.BOT_TOKEN;
 const PORT = process.env.PORT;
 const URL = process.env.URL;
+const admin = require("firebase-admin");
 
 const opts = {
     reply_markup: {
@@ -34,29 +34,25 @@ bot.telegram.setWebhook(`${URL}/bot${API_TOKEN}`);
 expressApp.use(bot.webhookCallback(`/bot${API_TOKEN}`));
 
 const HelpString = 'Please send the bus stop code (xxxxx), E.G. 72071 or both bus stop code and bus number (xxxxx bbb), E.G. 72071 21'
-
-
-var localStorage = new Storage("tmp//db.json", {
-  strict: false,
-  ws: "  ",
+admin.initializeApp({
+  credential: admin.credential.cert({
+    "private_key": process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    "client_email": process.env.FIREBASE_CLIENT_EMAIL,
+    "project_id":process.env.FIREBASE_PROJECT_ID,
+  }),
+  databaseURL: process.env.DATABASE_URL
 });
-
-bot.start((ctx) => {
-  try {
-    let id = ctx.update.message.from.id;
-    returnText(ctx, "Welcome! " + HelpString, id);
-  } catch (err) {}
-});
+let db = admin.database();
 
 bot.command("help", (ctx) => ctx.reply(HelpString));
 bot.command("Help", (ctx) => ctx.reply(HelpString));
 bot.command("/help", (ctx) => ctx.reply(HelpString));
 
-bot.on("text", (ctx) => {
+bot.on("text", async (ctx) => {
   try {
     if (ctx.message.text === "Remove") {
       let id = ctx.update.message.from.id;
-      let removeKeyboard = setRemoveKeyboard(id);
+      let removeKeyboard = await setRemoveKeyboard(id);
       return ctx.reply("Please click what to remove.", removeKeyboard);
     } else if (ctx.message.text.indexOf("Remove") == -1 ? false : true) {
       let arrayMessage = ctx.message.text.split(" ");
@@ -68,8 +64,8 @@ bot.on("text", (ctx) => {
         stopToRemove = arrayMessage[1];
       }
       let id = ctx.update.message.from.id;
-      removeFromFav(id, stopToRemove);
-      let removeKeyboard = setRemoveKeyboard(id);
+      await removeFromFav(id, stopToRemove);
+      let removeKeyboard = await setRemoveKeyboard(id);
       if (removeKeyboard.reply_markup.keyboard.length > 1) {
         return ctx.reply("Done removing!", removeKeyboard);
       } else {
@@ -92,13 +88,14 @@ bot.on("location", (ctx) => {
   } catch (err) {}
 });
 
-bot.on("callback_query", (ctx) => {
+bot.on("callback_query", async (ctx) => {
   let favStop = ctx.callbackQuery.data;
   let id = ctx.update.callback_query.from.id;
 
   let check = false;
   let favStops = [];
-  favStops = localStorage.getItem(id);
+  favStops = await getFavStops(id)
+  console.log(favStops)
   if (favStops) {
     favStops.forEach(function (oneStop) {
       if (oneStop === favStop) {
@@ -110,16 +107,16 @@ bot.on("callback_query", (ctx) => {
   }
   if (!check) {
     favStops.push(favStop);
-    localStorage.setItem(id, favStops);
+    updateFavStops(id, favStops)
     returnText(ctx, "The bus stop code has been added!", id);
   } else {
     returnText(ctx, "Aiyoo! The bus stop code there already!", id);
   }
 });
 
-function removeFromFav(id, toRemoveFav) {
+async function removeFromFav(id, toRemoveFav) {
   let favStops = [];
-  favStops = localStorage.getItem(id);
+  favStops = await getFavStops(id)
   let newFavStops = [];
   if (favStops) {
     for (var i = 0; i < favStops.length; i++) {
@@ -128,11 +125,11 @@ function removeFromFav(id, toRemoveFav) {
       }
     }
   }
-  localStorage.setItem(id, newFavStops);
+  await updateFavStops(id, newFavStops)
 }
 
-function setKeyboard(id) {
-  let favStops = localStorage.getItem(id);
+async function setKeyboard(id) {
+  let favStops = await getFavStops(id)
   let newOpts = {
     reply_markup: {
       keyboard: [
@@ -165,8 +162,8 @@ function setKeyboard(id) {
   return newOpts;
 }
 
-function setRemoveKeyboard(id) {
-  let favStops = localStorage.getItem(id);
+async function setRemoveKeyboard(id) {
+  let favStops = await getFavStops(id)
   let newOpts = {
     reply_markup: {
       keyboard: [],
@@ -190,28 +187,28 @@ function setRemoveKeyboard(id) {
   return newOpts;
 }
 
-function returnText(varCtx, message, id) {
+async function returnText(varCtx, message, id) {
   try {
-    let keyboard = setKeyboard(id);
+    let keyboard = await setKeyboard(id);
     varCtx.reply(message, keyboard);
   } catch (err) {}
 }
 
-function returnTextWithInline(
+async function returnTextWithInline(
   varCtx,
   inlineMessageRatingKeyboard,
   message,
   id
 ) {
   try {
-    let keyboard = setKeyboard(id);
+    let keyboard = await setKeyboard(id);
     varCtx.reply(message, inlineMessageRatingKeyboard, keyboard);
   } catch (err) {}
 }
 
-function returnHtmlText(varCtx, message, id) {
+async function returnHtmlText(varCtx, message, id) {
   try {
-    let keyboard = setKeyboard(id);
+    let keyboard = await setKeyboard(id);
     varCtx.replyWithHTML(message, keyboard);
   } catch (err) {
     console.log(err);
@@ -341,7 +338,6 @@ async function handleText(varCtx) {
                     ]).extra()
                     
                     returnTextWithInline(varCtx, inlineMessageRatingKeyboard, output, id)
-                    //returnText(varCtx, output)
                     return
                 } else {
                     if(await checkBusStop(text)){
@@ -379,7 +375,6 @@ async function handleText(varCtx) {
                             Markup.callbackButton('⭐Favourite', text)
                         ]).extra()
                         returnTextWithInline(varCtx, inlineMessageRatingKeyboard, output, id)
-                        //returnText(varCtx, output)
                         return
                     }
                 })
@@ -517,6 +512,21 @@ function httpGet(theUrl) {
   } catch (err) {
     resolve("");
   }
+}
+
+async function getFavStops(id){
+
+  let userDB = db.ref("/users/"+id);
+  let snapshot = await userDB.once('value')
+  console.log(snapshot.val())
+  return snapshot.val()
+}
+
+function updateFavStops(id, favStops){
+  console.log(id)
+  console.log(favStops)
+  let userDB = db.ref("/users/"+id);
+  userDB.set(favStops);
 }
 
 process.on("unhandledRejection", () => {});
