@@ -95,7 +95,6 @@ bot.on("callback_query", async (ctx) => {
   let check = false;
   let favStops = [];
   favStops = await getFavStops(id)
-  console.log(favStops)
   if (favStops) {
     favStops.forEach(function (oneStop) {
       if (oneStop === favStop) {
@@ -518,13 +517,10 @@ async function getFavStops(id){
 
   let userDB = db.ref("/users/"+id);
   let snapshot = await userDB.once('value')
-  console.log(snapshot.val())
   return snapshot.val()
 }
 
 function updateFavStops(id, favStops){
-  console.log(id)
-  console.log(favStops)
   let userDB = db.ref("/users/"+id);
   userDB.set(favStops);
 }
