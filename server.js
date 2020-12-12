@@ -271,15 +271,16 @@ async function handleLocation(varCtx) {
         output += "==========================" + "\n";
         let allBusStop = await getAllBusStop()
         let counter = 0;
-        await asyncForEach(allBusStop, async (busStop) => {
+        await asyncForEach(allBusStop, async (value, key) => {          
             let checkedPoint = {
-                lat: busStop.Latitude,
-                lng: busStop.Longitude
+                lat: value.lat,
+                lng: value.lng
             }
-            if (arePointsNear(checkedPoint, centerPoint, 0.25)) {               
+            if (arePointsNear(checkedPoint, centerPoint, 0.25)) { 
+                console.log(key)              
                 counter++
-                output += '<a href="https://www.google.com/maps/search/?api=1&query=' + busStop.Latitude + ',' + busStop.Longitude + '">' + busStop.Description + '  (' + busStop.BusStopCode + ')</a>' + '\n'
-                let busServices = await getBus(busStop.BusStopCode)
+                output += '<a href="https://www.google.com/maps/search/?api=1&query=' + value.lat + ',' + value.lng + '">' + value.name + '  (' + key + ')</a>' + '\n'
+                let busServices = await getBus(key)
                 busServices.sort(function (a, b) {
                     return a.ServiceNo - b.ServiceNo
                 })
@@ -307,8 +308,8 @@ async function handleLocation(varCtx) {
 async function checkBusStop(busStopNumber){
     let allBusStop = await getAllBusStop()
     let result = false;
-    await asyncForEach(allBusStop, async (busStop) => {
-        if( busStop.BusStopCode === busStopNumber){
+    await asyncForEach(allBusStop, async (value, key) => {
+        if( key === busStopNumber){
             result = true
         }
     })
