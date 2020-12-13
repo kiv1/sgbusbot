@@ -342,7 +342,7 @@ async function handleText(varCtx) {
                 let busServices = await getBus(text)
                 if (busServices.length != 0) {
                     busStopValue = await getLocationOfBusStop(text)
-                    output += '<a href="https://www.google.com/maps/search/?api=1&query=' + busStopValue.lat + ',' + busStopValue.lng + '">' + busStopValue.name + '  (' + text + ')</a>' + '\n'
+                    output += busStopValue.name + '  (' + text + ')' + '\n'
 
                     busServices.sort(function (a, b) {
                         return a.ServiceNo - b.ServiceNo
@@ -360,7 +360,7 @@ async function handleText(varCtx) {
                 } else {
                     if(await checkBusStop(text)){
                         busStopValue = await getLocationOfBusStop(text)
-                        output += '<a href="https://www.google.com/maps/search/?api=1&query=' + busStopValue.lat + ',' + busStopValue.lng + '">' + busStopValue.name + '  (' + text + ')</a>' + '\n'
+                        output += busStopValue.name + '  (' + text + ')' + '\n'
                         output+='Aiyoo! So late until no more bus liao!'
                         const inlineMessageRatingKeyboard = Markup.inlineKeyboard([
                             Markup.callbackButton('⭐Favourite', text)
