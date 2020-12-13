@@ -44,12 +44,17 @@ admin.initializeApp({
 });
 let db = admin.database();
 
-bot.command("help", (ctx) => ctx.reply(HelpString));
-bot.command("Help", (ctx) => ctx.reply(HelpString));
-bot.command("/help", (ctx) => ctx.reply(HelpString));
-bot.command("/start", (ctx) => ctx.reply("Welcome! "+HelpString));
-bot.command("Start", (ctx) => ctx.reply("Welcome! "+HelpString));
-bot.command("start", (ctx) => ctx.reply("Welcome! "+HelpString));
+
+bot.command("/help", (ctx) => {
+      let id = ctx.update.message.from.id;
+      returnText(ctx, HelpString, id);
+});
+
+bot.command("/start", (ctx) => {
+      let id = ctx.update.message.from.id;
+      returnText(ctx, "Welcome! " + HelpString, id);
+});
+
 
 bot.on("text", async (ctx) => {
   try {
