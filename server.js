@@ -315,6 +315,17 @@ async function checkBusStop(busStopNumber){
     return result
 }
 
+async function getLocationOfBusStop(busStopNumber){
+    let allBusStop = await getAllBusStop()
+    let result = false;
+    await asyncForEach(allBusStop, async (value, key) => {
+        if( key === busStopNumber){
+            result = value
+        }
+    })
+    return result
+}
+
 async function handleText(varCtx) {
     var text = varCtx.message.text
     var d = new Date()
@@ -322,12 +333,17 @@ async function handleText(varCtx) {
     // convert to msec since Jan 1 1970
     var localTime = d.getTime()
     let output = ''
+
     let id = varCtx.update.message.from.id
     try {
         if (text.length === 5) {
             if (!isNaN(text)) {
+
                 let busServices = await getBus(text)
                 if (busServices.length != 0) {
+                    busStopValue = await getLocationOfBusStop(text)
+                    output += '<a href="https://www.google.com/maps/search/?api=1&query=' + busStopValue.lat + ',' + busStopValue.lng + '">' + busStopValue.name + '  (' + text + ')</a>' + '\n'
+
                     busServices.sort(function (a, b) {
                         return a.ServiceNo - b.ServiceNo
                     })
@@ -343,7 +359,9 @@ async function handleText(varCtx) {
                     return
                 } else {
                     if(await checkBusStop(text)){
-                        output='Aiyoo! So late until no more bus liao!'
+                        busStopValue = await getLocationOfBusStop(text)
+                        output += '<a href="https://www.google.com/maps/search/?api=1&query=' + busStopValue.lat + ',' + busStopValue.lng + '">' + busStopValue.name + '  (' + text + ')</a>' + '\n'
+                        output+='Aiyoo! So late until no more bus liao!'
                         const inlineMessageRatingKeyboard = Markup.inlineKeyboard([
                             Markup.callbackButton('⭐Favourite', text)
                         ]).extra()
