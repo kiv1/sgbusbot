@@ -343,7 +343,7 @@ async function handleText(varCtx) {
                 if (busServices.length != 0) {
                     busStopValue = await getLocationOfBusStop(text)
                     output += busStopValue.name + '  (' + text + ')' + '\n'
-
+                    output += '==========================' + '\n'
                     busServices.sort(function (a, b) {
                         return a.ServiceNo - b.ServiceNo
                     })
@@ -361,6 +361,7 @@ async function handleText(varCtx) {
                     if(await checkBusStop(text)){
                         busStopValue = await getLocationOfBusStop(text)
                         output += busStopValue.name + '  (' + text + ')' + '\n'
+                        output += '==========================' + '\n'
                         output+='Aiyoo! So late until no more bus liao!'
                         const inlineMessageRatingKeyboard = Markup.inlineKeyboard([
                             Markup.callbackButton('⭐Favourite', text)
@@ -479,7 +480,7 @@ function writeText(element, nd) {
       break;
   }
 
-  let busText = "Bus: " + busNo + "\t|\v\v";
+  let busText = "Bus: " + busNo + "\v|\v\v";
 
   busText += formatText(diffMins, element.NextBus);
 
@@ -488,7 +489,7 @@ function writeText(element, nd) {
 
     diffMins = Math.round((((datetime - nd) % 86400000) % 3600000) / 60000);
     busText += "\n";
-    busText += "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t|\v\v";
+    busText += "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\v|\v\v";
     busText += formatText(diffMins, element.NextBus2);
   }
   if (element.NextBus3.EstimatedArrival != "") {
@@ -496,7 +497,7 @@ function writeText(element, nd) {
 
     diffMins = Math.round((((datetime - nd) % 86400000) % 3600000) / 60000);
     busText += "\n";
-    busText += "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t|\v\v";
+    busText += "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\v|\v\v";
     busText += formatText(diffMins, element.NextBus3);
   }
 
